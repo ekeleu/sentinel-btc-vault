@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  bitcoind:
+    image: lncm/bitcoind:v26.0 # Hardened 2026-ready image
+    container_name: btc-sentinel-vault
+    restart: unless-stopped
+    volumes:
+      # Map your 1TB SSD directly into the container
+      - /mnt/blockchain-vault/bitcoin:/home/bitcoin/.bitcoin
+      # Map your hardened config
+      - /etc/bitcoin/bitcoin.conf:/home/bitcoin/.bitcoin/bitcoin.conf
+    ports:
+      - "8333:8333" # Mainnet P2P
+      - "127.0.0.1:8332:8332" # RPC (Restricted to localhost)
+    healthcheck:
+      test: ["CMD", "bitcoin-cli", "getblockchaininfo"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
